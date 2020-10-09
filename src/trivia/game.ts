@@ -1,5 +1,6 @@
 import * as OpendTDB from '../opentdb';
 import {shuffle} from 'lodash';
+import * as EventEmitter from 'events';
 
 interface GameSettings {
     numberOfQuestions: number;
@@ -22,14 +23,25 @@ interface GameState {
     currentQuestion?: Question;
     correctLetter?: string;
     isGameRunning?: boolean;
+    currentAnswers: Record<string, string>;
+    scores: Record<string, number>;
 }
+
+const gameStateEventEmitter = new EventEmitter.EventEmitter();
 
 const gameState: GameState = {};
 const gameIsRunning = () => gameState.isGameRunning;
 
 function startGame(settings: GameSettings) {
+  if (gameState.isGameRunning) {
+    gameStateEventEmitter.emit('gameAlreadyGoing');
+    return;
+  }
+
   gameState.isGameRunning = true;
   gameState.settings = settings;
+  gameState.currentAnswers = {};
+  gameState.scores = {};
 }
 
 const getCorrectLetter = (choices: string[], correctAnswer: string): string => {
@@ -44,11 +56,25 @@ async function getNextQuestion(): Promise<{question: Question, choices: string[]
   const choices = shuffle([...question.incorrect_answers, question.correct_answer]);
   gameState.currentQuestion = question;
   gameState.correctLetter = getCorrectLetter(choices, question.correct_answer);
+  setTimeout(evaluateAnswers, 5000);
   return { question, choices };
 }
 
-function answer(choice): boolean {
-  return gameState.correctLetter === choice;
+function collectAnswer(answer: string, userName: string) {
+  if (!['a', 'b', 'c', 'd'].includes(answer)) {
+    return
+  }
+  gameState.currentAnswers[userName] = answer;
 }
 
-export { startGame, gameIsRunning, getNextQuestion, Question, getCorrectLetter, answer }
+function evaluateAnswers() {
+  console.log('Evaluating answers');
+  for (const [username, answer] of Object.entries(gameState.currentAnswers)) {
+    if (answer === gameState.correctLetter) {
+      gameState.scores[username] = gameState.scores[username] || 0 + 100;
+    }
+  }
+  gameStateEventEmitter.emit('answersEvaluated', gameState.correctLetter, gameState.scores );
+}
+
+export { startGame, gameIsRunning, getNextQuestion, Question, getCorrectLetter, collectAnswer, gameStateEventEmitter }
