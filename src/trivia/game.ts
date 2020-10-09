@@ -7,7 +7,8 @@ interface GameSettings {
     category: string;
     difficulty?: string;
     questionType: string;
-    blacklisted: string[]
+    blacklisted: string[];
+    scoreLimit: number;
 }
 
 interface Question {
@@ -23,8 +24,8 @@ interface GameState {
     currentQuestion?: Question;
     correctLetter?: string;
     isGameRunning?: boolean;
-    currentAnswers: Record<string, string>;
-    scores: Record<string, number>;
+    currentAnswers?: Record<string, string>;
+    scores?: Record<string, number>;
 }
 
 const gameStateEventEmitter = new EventEmitter.EventEmitter();
@@ -44,6 +45,11 @@ function startGame(settings: GameSettings) {
   gameState.scores = {};
 }
 
+function stopGame() {
+  gameState.isGameRunning = false;
+  return gameState.scores;
+}
+
 const getCorrectLetter = (choices: string[], correctAnswer: string): string => {
   const index = choices.findIndex((choice, index) => {
     return choice === correctAnswer;
@@ -52,11 +58,11 @@ const getCorrectLetter = (choices: string[], correctAnswer: string): string => {
 };
 
 async function getNextQuestion(): Promise<{question: Question, choices: string[]}> {
-  const question = await OpendTDB.getQuestion(gameState.settings.category, gameState.settings.difficulty, gameState.settings.questionType, [] );
+  const question = await OpendTDB.getQuestion(gameState.settings.category, gameState.settings.difficulty, gameState.settings.questionType, gameState.settings.blacklisted);
   const choices = shuffle([...question.incorrect_answers, question.correct_answer]);
   gameState.currentQuestion = question;
   gameState.correctLetter = getCorrectLetter(choices, question.correct_answer);
-  setTimeout(evaluateAnswers, 5000);
+  setTimeout(evaluateAnswers, 18000);
   return { question, choices };
 }
 
@@ -68,13 +74,24 @@ function collectAnswer(answer: string, userName: string) {
 }
 
 function evaluateAnswers() {
+  if (!gameState.isGameRunning) {
+    return;
+  }
   console.log('Evaluating answers');
   for (const [username, answer] of Object.entries(gameState.currentAnswers)) {
     if (answer === gameState.correctLetter) {
-      gameState.scores[username] = gameState.scores[username] || 0 + 100;
+      gameState.scores[username] = (gameState.scores[username] || 0) + 100;
     }
   }
-  gameStateEventEmitter.emit('answersEvaluated', gameState.correctLetter, gameState.scores );
+  // const maxScore = gameState.scores.find(score => score.Math.max(Object.values(gameState.scores)));
+
+  const winner = Object.entries(gameState.scores).find(([key, value]) => value > gameState.settings.scoreLimit);
+
+  if (winner) {
+    gameStateEventEmitter.emit('gameCompleted', gameState.correctLetter, gameState.scores, winner[0] );
+  } else {
+    gameStateEventEmitter.emit('answersEvaluated', gameState.correctLetter, gameState.scores);
+  }
 }
 
-export { startGame, gameIsRunning, getNextQuestion, Question, getCorrectLetter, collectAnswer, gameStateEventEmitter }
+export { startGame, stopGame, gameIsRunning, getNextQuestion, Question, getCorrectLetter, collectAnswer, gameStateEventEmitter }

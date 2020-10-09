@@ -1,15 +1,18 @@
-import * as Trivia from "../../trivia/game";
-import {getCurrentChannel, sendNextQuestion} from "../index";
+import {formatScores, getCurrentChannel, sendNextQuestion} from "../index";
 
 const handleAnswersEvaluated = async (correctLetter, scores) => {
   const currentChannel = getCurrentChannel();
-  currentChannel.send(`Correct answer: ${correctLetter}`);
-  for (const [user, score] of Object.entries(scores)) {
-    currentChannel.send(`${user}: ${score}`);
-  }
-  console.log(scores);
-  const {question, choices } = await Trivia.getNextQuestion();
+  const formattedScores = formatScores(scores);
+  currentChannel.send(`Correct answer: ${correctLetter} scores: ${formattedScores}`);
   await sendNextQuestion(currentChannel);
 };
 
-export { handleAnswersEvaluated };
+const handleGameCompleted = async (correctLetter, scores, winner) => {
+  const currentChannel = getCurrentChannel();
+  const formattedScores = formatScores(scores);
+  currentChannel.send(`Correct answer: ${correctLetter} scores: ${formattedScores}\n Winner ${winner}`);
+
+};
+
+
+export { handleAnswersEvaluated, handleGameCompleted };

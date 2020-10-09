@@ -12,6 +12,7 @@ let currentChannel: Discord.Channel;
 
 gameStateEventEmitter.on('gameAlreadyGoing', handleGameAlreadyGoing);
 gameStateEventEmitter.on('answersEvaluated', handleAnswersEvaluated);
+gameStateEventEmitter.on('gameCompleted', handleAnswersEvaluated);
 
 client.once('ready', handleReady);
 client.on('message', handleMessage);
