@@ -1,20 +1,27 @@
+import * as Trivia from "../trivia/game";
 import * as Discord from 'discord.js';
-import * as dotenv from 'dotenv';
-import {gameStateEventEmitter} from "./trivia/game";
-import { handleMessage } from './discord/events/message';
-import { handleReady } from './discord/events/ready';
-import {handleAnswersEvaluated} from "./discord/events/answersEvaluated";
-import { handleGameAlreadyGoing } from './discord/events/gameAlreadyGoing';
-dotenv.config();
 
-const client = new Discord.Client();
 let currentChannel: Discord.Channel;
 
-gameStateEventEmitter.on('gameAlreadyGoing', handleGameAlreadyGoing);
-gameStateEventEmitter.on('answersEvaluated', handleAnswersEvaluated);
-gameStateEventEmitter.on('gameCompleted', handleAnswersEvaluated);
+const setCurrentChannel = (channel: Discord.Channel) => currentChannel = channel;
+const getCurrentChannel = (): Discord.Channel => currentChannel;
 
-client.once('ready', handleReady);
-client.on('message', handleMessage);
+const formatScores = (scores) => Object.keys(scores).reduce((acc, current) => `${acc} ${current}: ${scores[current]}`, '');
 
-client.login(process.env.TOKEN);
+
+function formatQuestion(question:string, choices: string) {
+  const formattedChoices = choices.reduce((acc, current, index) => {return `${acc} ${String.fromCharCode('a'.charCodeAt(0) + index) }) ${current}\n`}, '');
+  return `${question.question} (difficulty: ${question.difficulty})\n${formattedChoices}`;
+}
+
+async function sendNextQuestion(channel: Discord.TextChannel) {
+  const {question, choices } = await Trivia.getNextQuestion();
+  console.log(question);
+
+  const message = formatQuestion(question, choices);
+  const encodedMessage = decodeURIComponent(message);
+
+  await channel.send(encodedMessage);
+}
+
+export { setCurrentChannel, getCurrentChannel, sendNextQuestion, formatQuestion, formatScores };
