@@ -58,7 +58,6 @@ const getCorrectLetter = (choices: string[], correctAnswer: string): string => {
 };
 
 async function getNextQuestion(): Promise<{question: Question, choices: string[]}> {
-  gameState.currentAnswers = {};
   const question = await OpendTDB.getQuestion(gameState.settings.category, gameState.settings.difficulty, gameState.settings.questionType, gameState.settings.blacklisted);
   const choices = shuffle([...question.incorrect_answers, question.correct_answer]);
   gameState.currentQuestion = question;
