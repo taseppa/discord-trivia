@@ -10,8 +10,8 @@ const formatScores = (scores) => Object.keys(scores).reduce((acc, current) => `$
 
 
 function formatQuestion(question, choices) {
-  const formattedChoices = choices.reduce((acc, current, index) => {return `${acc} ${String.fromCharCode('a'.charCodeAt(0) + index) }: ${current}\n`}, '');
-  return `${question.question} (difficulty: ${question.difficulty})\n${formattedChoices}`;
+  const formattedChoices = choices.reduce((acc, current, index) => {return `${acc} ${String.fromCharCode('a'.charCodeAt(0) + index) }) ${current}\n`}, '');
+  return `======\nCategory: ${question.category}\n${question.question} (difficulty: ${question.difficulty})\n${formattedChoices}`;
 }
 
 async function sendNextQuestion(channel: Discord.TextChannel) {

@@ -1,13 +1,12 @@
 import {getCategory, getQuestion} from '../opentdb';
 import * as Trivia from '../trivia/game';
-import {getCorrectLetter, Question} from "../trivia/game";
+import {getCorrectLetter, getWinner, Question} from "../trivia/game";
 import {getCategories} from "../opentdb/api";
 import {formatQuestion} from "../discord";
 
 test('Get next question', async () => {
 
   Trivia.startGame({
-    numberOfQuestions:  50,
     category:  '19',
     difficulty:  'medium',
     questionType:  'multiple',
@@ -43,3 +42,34 @@ test('Format question', () => {
   const formatted = formatQuestion(question, ['bar', 'baz', 'q']);
   expect(formatted).toBe('foo (difficulty: medium)')
 })
+
+describe('Get winner', () => {
+
+  const gameState = {
+    isGameRunning : true,
+    settings : {
+      scoreLimit: 300},
+    currentAnswers : {},
+    scores : {
+      bar: 200,
+      foo: 100
+    }
+  }
+
+  test('No winner', () => {
+    expect(getWinner(gameState)).toBe(undefined);
+  });
+
+  test('One user exceeds score', () => {
+    gameState.scores.foo = 400;
+    expect(getWinner(gameState)).toBe('foo');
+  });
+  test('Two user exceeds score', () => {
+    gameState.scores.bar = 500;
+    expect(getWinner(gameState)).toBe('bar');
+  });
+  test('Two user exceeds score but scores are drawn', () => {
+    gameState.scores.foo = 500;
+    expect(getWinner(gameState)).toBe(undefined);
+  });
+});

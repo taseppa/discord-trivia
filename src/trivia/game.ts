@@ -1,14 +1,13 @@
 import * as OpendTDB from '../opentdb';
-import {shuffle} from 'lodash';
+import {shuffle, maxBy } from 'lodash';
 import * as EventEmitter from 'events';
 
 interface GameSettings {
-    numberOfQuestions: number;
-    category: string;
+    category?: string;
     difficulty?: string;
-    questionType: string;
-    blacklisted: string[];
-    scoreLimit: number;
+    questionType?: string;
+    blacklisted?: string[];
+    scoreLimit?: number;
 }
 
 interface Question {
@@ -58,6 +57,7 @@ const getCorrectLetter = (choices: string[], correctAnswer: string): string => {
 };
 
 async function getNextQuestion(): Promise<{question: Question, choices: string[]}> {
+  gameState.currentAnswers = {};
   const question = await OpendTDB.getQuestion(gameState.settings.category, gameState.settings.difficulty, gameState.settings.questionType, gameState.settings.blacklisted);
   const choices = shuffle([...question.incorrect_answers, question.correct_answer]);
   gameState.currentQuestion = question;
@@ -83,15 +83,31 @@ function evaluateAnswers() {
       gameState.scores[username] = (gameState.scores[username] || 0) + 100;
     }
   }
-  // const maxScore = gameState.scores.find(score => score.Math.max(Object.values(gameState.scores)));
 
-  const winner = Object.entries(gameState.scores).find(([key, value]) => value > gameState.settings.scoreLimit);
+  const winner = getWinner(gameState);
 
   if (winner) {
-    gameStateEventEmitter.emit('gameCompleted', gameState.correctLetter, gameState.scores, winner[0] );
+    gameStateEventEmitter.emit('gameCompleted', gameState.correctLetter, gameState.scores, winner);
   } else {
     gameStateEventEmitter.emit('answersEvaluated', gameState.correctLetter, gameState.scores);
   }
 }
 
-export { startGame, stopGame, gameIsRunning, getNextQuestion, Question, getCorrectLetter, collectAnswer, gameStateEventEmitter }
+// Determining winner is a little bit tricky because scores can be drawn
+function getWinner(gameState: GameState): string {
+  const usersExceedingScore = Object.entries(gameState.scores).filter(([key, value]) => value >= gameState.settings.scoreLimit);
+  if (usersExceedingScore.length === 0) {
+    return undefined;
+  }
+
+  const [potentialWinner, maxScore] = maxBy(usersExceedingScore, ([username, score]) => score);
+  const otherMaxScores = usersExceedingScore.filter(([username, score]) => score === maxScore);
+  if (otherMaxScores.length > 1) {
+    return undefined;
+  }
+
+  return potentialWinner;
+}
+
+
+export { startGame, stopGame, gameIsRunning, getNextQuestion, Question, getCorrectLetter, collectAnswer, gameStateEventEmitter, getWinner }
