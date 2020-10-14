@@ -4,7 +4,7 @@ let categoryCache;
 
 interface Category {
   name: string;
-  id: number;
+  id: string;
 }
 
 const getQuestions = async (category: string, difficulty: string, questionType: string) => {
@@ -22,4 +22,4 @@ const getCategories = async () => {
   return results.trivia_categories;
 }
 
-export { getQuestions, getCategories };
+export { getQuestions, getCategories, Category };

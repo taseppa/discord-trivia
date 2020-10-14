@@ -1,15 +1,17 @@
-import {getQuestions, getCategories} from "./api";
-import {Question} from "../trivia/game";
+import { getQuestions, getCategories, Category } from "./api";
+import { Question } from "../trivia/game";
+
+const filterBlacklistedCategories = (categories: Category[], blacklisted: string[]): Category[] =>
+  categories.filter(category => !blacklisted.some(banned => category.name.toLowerCase().includes(banned.toLowerCase())));
 
 async function getCategory(category: string, blacklisted: string[]): Promise<string> {
   if (category) {
     return category;
   }
   const categories = await getCategories();
-  const filteredCategories = categories.filter(category => !blacklisted.some(banned => category.name.toLowerCase().includes(banned.toLowerCase())));
+  const filteredCategories = filterBlacklistedCategories(categories, blacklisted);
   console.log(filteredCategories);
   return filteredCategories[Math.floor(Math.random() * filteredCategories.length)].id;
-
 }
 
 async function getQuestion(category: string, difficulty: string, questionType: string, blacklisted: string[]): Promise<Question> {
@@ -19,4 +21,4 @@ async function getQuestion(category: string, difficulty: string, questionType: s
   return results[0];
 }
 
-export { getQuestion, getCategory };
+export { getQuestion, getCategory, filterBlacklistedCategories };
