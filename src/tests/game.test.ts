@@ -1,21 +1,6 @@
-import {getCategory, getQuestion} from '../opentdb';
-import * as Trivia from '../trivia/game';
-import {getCorrectLetter, getWinner, Question} from "../trivia/game";
-import {getCategories} from "../opentdb/api";
-import {formatQuestion} from "../discord";
-
-test('Get next question', async () => {
-
-  Trivia.startGame({
-    category:  '19',
-    difficulty:  'medium',
-    questionType:  'multiple',
-    blacklisted:  []});
-
-  const question = await Trivia.getNextQuestion();
-  console.log(question);
-  // expect(question is Question).toBe(true);
-});
+import { getCategory, getQuestion } from '../opentdb';
+import { getCorrectLetter, getNewScores, getWinner, Question } from "../trivia/game";
+import { formatQuestion } from "../discord";
 
 test('Get correct letter',  () => {
   const letter = getCorrectLetter(['foo', 'bar', 'baz'], 'baz');
@@ -36,20 +21,22 @@ test('Get question', async () =>  {
 test('Format question', () => {
   const question = {
     difficulty: 'medium',
-    question: 'foo'
+    question: 'foo',
+    category: 'something',
+    correct_answer: '',
+    incorrect_answers: []
   };
 
   const formatted = formatQuestion(question, ['bar', 'baz', 'q']);
-  expect(formatted).toBe('foo (difficulty: medium)')
+  expect(formatted).toBe('======\nCategory: something\nfoo (difficulty: medium)\na) bar\nb) baz\nc) q\n')
 })
 
 describe('Get winner', () => {
-
   const gameState = {
     isGameRunning : true,
     settings : {
-      scoreLimit: 300},
-    currentAnswers : {},
+      scoreLimit: 300 },
+    currentAnswers : [],
     scores : {
       bar: 200,
       foo: 100
@@ -71,5 +58,34 @@ describe('Get winner', () => {
   test('Two user exceeds score but scores are drawn', () => {
     gameState.scores.foo = 500;
     expect(getWinner(gameState)).toBe(undefined);
+  });
+});
+
+test('Evaluate scores', () => {
+  const gameState = {
+    isGameRunning : true,
+    correctLetter: 'a',
+    settings : {
+      scoreLimit: 300 },
+    currentAnswers : [
+      { username: 'a', letter: 'a' },
+      { username: 'b', letter: 'a' },
+      { username: 'c', letter: 'a' },
+      { username: 'd', letter: 'b' },
+    ],
+    scores : {
+      a: 100,
+      b: 100,
+      c: 100,
+      d: 100
+    }
+  };
+
+  const newScores = getNewScores(gameState);
+  expect(newScores).toEqual({
+    a: 200,
+    b: 150,
+    c: 150,
+    d: 100
   });
 });

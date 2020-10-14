@@ -1,4 +1,4 @@
-import {formatScores, getCurrentChannel, sendNextQuestion} from "../index";
+import { formatScores, getCurrentChannel, sendNextQuestion } from "../index";
 
 const handleAnswersEvaluated = async (correctLetter: string, scores: string) => {
   const currentChannel = getCurrentChannel();

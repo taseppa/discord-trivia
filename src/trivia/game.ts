@@ -1,5 +1,5 @@
 import * as OpendTDB from '../opentdb';
-import {shuffle, maxBy } from 'lodash';
+import { shuffle, maxBy } from 'lodash';
 import * as EventEmitter from 'events';
 
 interface GameSettings {
@@ -23,8 +23,13 @@ interface GameState {
     currentQuestion?: Question;
     correctLetter?: string;
     isGameRunning?: boolean;
-    currentAnswers?: Record<string, string>;
+    currentAnswers?: Answer[];
     scores?: Record<string, number>;
+}
+
+interface Answer {
+    letter: string;
+    username: string;
 }
 
 const gameStateEventEmitter = new EventEmitter.EventEmitter();
@@ -40,7 +45,7 @@ function startGame(settings: GameSettings) {
 
   gameState.isGameRunning = true;
   gameState.settings = settings;
-  gameState.currentAnswers = {};
+  gameState.currentAnswers = [];
   gameState.scores = {};
 }
 
@@ -57,7 +62,7 @@ const getCorrectLetter = (choices: string[], correctAnswer: string): string => {
 };
 
 async function getNextQuestion(): Promise<{question: Question, choices: string[]}> {
-  gameState.currentAnswers = {};
+  gameState.currentAnswers = [];
   const question = await OpendTDB.getQuestion(gameState.settings.category, gameState.settings.difficulty, gameState.settings.questionType, gameState.settings.blacklisted);
   const choices = shuffle([...question.incorrect_answers, question.correct_answer]);
   gameState.currentQuestion = question;
@@ -73,17 +78,23 @@ function collectAnswer(answer: string, userName: string) {
   gameState.currentAnswers[userName] = answer;
 }
 
+function getNewScores(gameState: GameState): Record<string, number> {
+  const updates = gameState.currentAnswers.filter(answer => answer.letter === gameState.correctLetter).
+    reduce((acc, curr, index) => {
+      const newScore = (gameState.scores[curr.username] || 0) + (index === 0 ? 100 : 50);
+      return { ...acc, [curr.username]: newScore };
+    }, {});
+  console.log(updates, gameState.scores);
+  return { ...gameState.scores, ...updates };
+}
+
 function evaluateAnswers() {
   if (!gameState.isGameRunning) {
     return;
   }
   console.log('Evaluating answers');
-  for (const [username, answer] of Object.entries(gameState.currentAnswers)) {
-    if (answer === gameState.correctLetter) {
-      gameState.scores[username] = (gameState.scores[username] || 0) + 100;
-    }
-  }
 
+  gameState.scores = getNewScores(gameState);
   const winner = getWinner(gameState);
 
   if (winner) {
@@ -110,4 +121,15 @@ function getWinner(gameState: GameState): string {
 }
 
 
-export { startGame, stopGame, gameIsRunning, getNextQuestion, Question, getCorrectLetter, collectAnswer, gameStateEventEmitter, getWinner }
+export {
+  startGame,
+  stopGame,
+  gameIsRunning,
+  getNextQuestion,
+  Question,
+  getCorrectLetter,
+  collectAnswer,
+  gameStateEventEmitter,
+  getWinner,
+  getNewScores
+}
