@@ -1,9 +1,9 @@
 import * as Trivia from '../../trivia/game';
-import {formatScores, sendNextQuestion, setCurrentChannel} from "../index";
+import { formatScores, sendNextQuestion, setCurrentChannel } from "../index";
 import * as parseArgs from 'minimist';
 import * as Discord from 'discord.js';
 
-async function handleStart(message) {
+async function handleStart(message: Discord.Message) {
   setCurrentChannel(message.channel);
   const params = message.content.substr('trivia start'.length).split(' ');
   const args = parseArgs(params);
@@ -19,9 +19,9 @@ async function handleStart(message) {
   await sendNextQuestion(message.channel);
 }
 
-async function handleStop(message) {
+async function handleStop(message: Discord.Message) {
   const scores = Trivia.stopGame();
-  message.channel.send(formatScores(scores));
+  await message.channel.send(formatScores(scores));
 }
 
 async function handleMessage(message: Discord.Message) {

@@ -1,4 +1,4 @@
-import {getCurrentChannel} from "../index";
+import { getCurrentChannel } from "../index";
 
 export function handleGameAlreadyGoing() {
   getCurrentChannel().send('Game already going.');

@@ -1,9 +1,9 @@
 import * as Discord from 'discord.js';
 import * as dotenv from 'dotenv';
-import {gameStateEventEmitter} from "./trivia/game";
+import { gameStateEventEmitter } from "./trivia/game";
 import { handleMessage } from './discord/events/message';
 import { handleReady } from './discord/events/ready';
-import {handleAnswersEvaluated, handleGameCompleted} from "./discord/events/answersEvaluated";
+import { handleAnswersEvaluated, handleGameCompleted } from "./discord/events/answersEvaluated";
 import { handleGameAlreadyGoing } from './discord/events/gameAlreadyGoing';
 dotenv.config();
 

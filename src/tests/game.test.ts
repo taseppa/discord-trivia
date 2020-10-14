@@ -1,4 +1,4 @@
-import { filterBlacklistedCategories, getCategory, getQuestion } from '../opentdb';
+import OpenTDB from '../opentdb';
 import { getCorrectLetter, getNewScores, getWinner, Question } from "../trivia/game";
 import { formatQuestion } from "../discord";
 
@@ -13,16 +13,16 @@ test('Filter blacklisted categories',  () => {
     { name: 'Super anime', id:'33' },
     { name: 'some cartoon stuff', id: '45' }
   ];
-  const filteredCategories = filterBlacklistedCategories(categories,['anime', 'cartoon']);
+  const filteredCategories = OpenTDB.filterBlacklistedCategories(categories,['anime', 'cartoon']);
   expect(filteredCategories).toEqual(    [{ name: 'foo', id: '22' }]);
 });
 
 // TODO: need mock OpendTDB api to test these
-test('Get question', async () =>  {
-  const question = await getQuestion(undefined, 'medium', 'multiple', ['anime']);
-  console.log(question);
-}
-);
+// test('Get question', async () =>  {
+//   const question = await OpenTDB.getQuestion({});
+//   console.log(question);
+// }
+// );
 
 test('Format question', () => {
   const question = {

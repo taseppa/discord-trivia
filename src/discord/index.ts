@@ -9,7 +9,6 @@ const getCurrentChannel = (): Discord.Channel => currentChannel;
 
 const formatScores = (scores) => Object.keys(scores).reduce((acc, current) => `${acc} ${current}: ${scores[current]}`, '');
 
-
 function formatQuestion(question: Question, choices: string[]): string {
   const formattedChoices = choices.reduce((acc, current, index) => {return `${acc}${String.fromCharCode('a'.charCodeAt(0) + index) }) ${current}\n`}, '');
   return `======\nCategory: ${question.category}\n${question.question} (difficulty: ${question.difficulty})\n${formattedChoices}`;

@@ -1,6 +1,9 @@
-import * as OpendTDB from '../opentdb';
+import OpendTDB from '../opentdb';
 import { shuffle, maxBy } from 'lodash';
 import * as EventEmitter from 'events';
+
+const gameStateEventEmitter = new EventEmitter.EventEmitter();
+const gameState: GameState = {};
 
 interface GameSettings {
     category?: string;
@@ -32,11 +35,6 @@ interface Answer {
     username: string;
 }
 
-const gameStateEventEmitter = new EventEmitter.EventEmitter();
-
-const gameState: GameState = {};
-const gameIsRunning = () => gameState.isGameRunning;
-
 function startGame(settings: GameSettings) {
   if (gameState.isGameRunning) {
     gameStateEventEmitter.emit('gameAlreadyGoing');
@@ -63,7 +61,7 @@ const getCorrectLetter = (choices: string[], correctAnswer: string): string => {
 
 async function getNextQuestion(): Promise<{question: Question, choices: string[]}> {
   gameState.currentAnswers = [];
-  const question = await OpendTDB.getQuestion(gameState.settings.category, gameState.settings.difficulty, gameState.settings.questionType, gameState.settings.blacklisted);
+  const question = await OpendTDB.getQuestion(gameState.settings);
   const choices = shuffle([...question.incorrect_answers, question.correct_answer]);
   gameState.currentQuestion = question;
   gameState.correctLetter = getCorrectLetter(choices, question.correct_answer);
@@ -111,8 +109,8 @@ function getWinner(gameState: GameState): string {
     return undefined;
   }
 
-  const [potentialWinner, maxScore] = maxBy(usersExceedingScore, ([username, score]) => score);
-  const otherMaxScores = usersExceedingScore.filter(([username, score]) => score === maxScore);
+  const [potentialWinner, maxScore] = maxBy(usersExceedingScore, ([, score]) => score);
+  const otherMaxScores = usersExceedingScore.filter(([, score]) => score === maxScore);
   if (otherMaxScores.length > 1) {
     return undefined;
   }
@@ -124,9 +122,9 @@ function getWinner(gameState: GameState): string {
 export {
   startGame,
   stopGame,
-  gameIsRunning,
   getNextQuestion,
   Question,
+  GameSettings,
   getCorrectLetter,
   collectAnswer,
   gameStateEventEmitter,
