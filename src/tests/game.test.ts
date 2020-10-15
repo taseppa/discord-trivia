@@ -1,5 +1,5 @@
 import OpenTDB from '../opentdb';
-import { getCorrectLetter, getNewScores, getWinner, Question } from "../trivia/game";
+import { getCorrectLetter, getNewScores, getWinner, Question, updateAnswers } from "../trivia/game";
 import { formatQuestion } from "../discord";
 
 test('Get correct letter',  () => {
@@ -66,6 +66,23 @@ describe('Get winner', () => {
     expect(getWinner(gameState)).toBe(undefined);
   });
 });
+
+describe('Collect answer', () => {
+  const currentAnswers = [
+    { username: 'foo', letter: 'a' }
+  ];
+
+  test('Invalid letter used', () => {
+    const updatedAnswers = updateAnswers(currentAnswers, { username: 'bar', letter: 'x' });
+    expect(updatedAnswers).toEqual(currentAnswers);
+  });
+
+  test('Collect valid answer', () => {
+    const answer = { username: 'bar', letter: 'c' };
+    const updatedAnswers = updateAnswers(currentAnswers, answer );
+    expect(updatedAnswers).toEqual([...currentAnswers, answer] );
+  });
+})
 
 test('Evaluate scores', () => {
   const gameState = {

@@ -69,11 +69,15 @@ async function getNextQuestion(): Promise<{question: Question, choices: string[]
   return { question, choices };
 }
 
-function collectAnswer(answer: string, userName: string) {
-  if (!['a', 'b', 'c', 'd'].includes(answer)) {
-    return
+function updateAnswers(currentAnswers: Answer[], answer: Answer) {
+  if (!['a', 'b', 'c', 'd'].includes(answer.letter)) {
+    return currentAnswers;
   }
-  gameState.currentAnswers[userName] = answer;
+  return [...currentAnswers, answer];
+}
+
+function collectAnswer(answer: Answer) {
+  gameState.currentAnswers = updateAnswers(gameState.currentAnswers, answer);
 }
 
 function getNewScores(gameState: GameState): Record<string, number> {
@@ -118,7 +122,6 @@ function getWinner(gameState: GameState): string {
   return potentialWinner;
 }
 
-
 export {
   startGame,
   stopGame,
@@ -129,5 +132,6 @@ export {
   collectAnswer,
   gameStateEventEmitter,
   getWinner,
-  getNewScores
+  getNewScores,
+  updateAnswers
 }
