@@ -1,5 +1,5 @@
 import { getCurrentChannel } from "../index";
 
-export function handleGameAlreadyGoing() {
-  getCurrentChannel().send('Game already going.');
+export async function handleGameAlreadyGoing() {
+  await getCurrentChannel().send('Game already going.');
 }

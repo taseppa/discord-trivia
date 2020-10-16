@@ -2,10 +2,10 @@ import * as Trivia from "../trivia/game";
 import * as Discord from 'discord.js';
 import { Question } from "../trivia/game";
 
-let currentChannel: Discord.Channel;
+let currentChannel: Discord.TextChannel;
 
-const setCurrentChannel = (channel: Discord.Channel) => currentChannel = channel;
-const getCurrentChannel = (): Discord.Channel => currentChannel;
+const setCurrentChannel = (channel: Discord.TextChannel) => currentChannel = channel;
+const getCurrentChannel = (): Discord.TextChannel => currentChannel;
 
 const formatScores = (scores) => Object.keys(scores).reduce((acc, current) => `${acc} ${current}: ${scores[current]}`, '');
 

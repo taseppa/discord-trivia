@@ -2,9 +2,10 @@ import * as Trivia from '../../trivia/game';
 import { formatScores, sendNextQuestion, setCurrentChannel } from "../index";
 import * as parseArgs from 'minimist';
 import * as Discord from 'discord.js';
+import { TextChannel } from "discord.js";
 
 async function handleStart(message: Discord.Message) {
-  setCurrentChannel(message.channel);
+  setCurrentChannel(message.channel as TextChannel);
   const params = message.content.substr('trivia start'.length).split(' ');
   const args = parseArgs(params);
   console.log(args);
@@ -16,7 +17,7 @@ async function handleStart(message: Discord.Message) {
     scoreLimit: args.limit || 1000
   });
 
-  await sendNextQuestion(message.channel);
+  await sendNextQuestion(message.channel as TextChannel);
 }
 
 async function handleStop(message: Discord.Message) {
@@ -30,7 +31,7 @@ async function handleMessage(message: Discord.Message) {
   } else if(message.content.startsWith('trivia stop')) {
     await handleStop(message);
   } else if (!message.author.bot) {
-    Trivia.collectAnswer(message.content, message.author.username);
+    Trivia.collectAnswer({ letter: message.content, username:message.author.username });
   }
 }
 
