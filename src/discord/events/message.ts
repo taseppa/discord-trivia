@@ -4,15 +4,19 @@ import * as parseArgs from 'minimist';
 import * as Discord from 'discord.js';
 import { TextChannel } from "discord.js";
 
+interface ParsedArguments {
+  ban: string;
+  limit: number;
+  category: string;
+}
+
 async function handleStart(message: Discord.Message) {
   setCurrentChannel(message.channel as TextChannel);
   const params = message.content.substr('trivia start'.length).split(' ');
-  const args = parseArgs(params);
+  const args = parseArgs(params) as ParsedArguments;
   console.log(args);
   Trivia.startGame({
-    numberOfQuestions: args.numberOfQuestions || 50,
     category: args.category,
-    questionType: args.type || 'multiple',
     blacklisted: args.ban ? args.ban.split(',') : [],
     scoreLimit: args.limit || 1000
   });

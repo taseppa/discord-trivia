@@ -8,7 +8,6 @@ const gameState: GameState = {};
 interface GameSettings {
     category?: string;
     difficulty?: string;
-    questionType?: string;
     blacklisted?: string[];
     scoreLimit?: number;
 }

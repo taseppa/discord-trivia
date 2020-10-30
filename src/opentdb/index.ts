@@ -16,8 +16,7 @@ async function getCategory(category: string, blacklisted: string[]): Promise<str
 
 async function getQuestion(gameSettings: GameSettings): Promise<Question> {
   const randomCategory = await getCategory(gameSettings.category, gameSettings.blacklisted);
-  console.log(randomCategory);
-  const questions = await getQuestions(randomCategory, gameSettings.difficulty, gameSettings.questionType);
+  const questions = await getQuestions(randomCategory, gameSettings.difficulty);
   return questions[0];
 }
 
