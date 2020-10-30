@@ -26,7 +26,7 @@ async function handleStart(message: Discord.Message) {
 
 async function handleStop(message: Discord.Message) {
   const scores = Trivia.stopGame();
-  await message.channel.send(formatScores(scores));
+  await message.channel.send(`Game stopped.\n${formatScores(scores)}`);
 }
 
 async function handleMessage(message: Discord.Message) {
