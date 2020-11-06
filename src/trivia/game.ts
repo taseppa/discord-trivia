@@ -99,6 +99,7 @@ function evaluateAnswers() {
   const winner = getWinner(gameState);
 
   if (winner) {
+    gameState.isGameRunning = false;
     gameStateEventEmitter.emit('gameCompleted', gameState.correctLetter, gameState.scores, winner);
   } else {
     gameStateEventEmitter.emit('answersEvaluated', gameState.correctLetter, gameState.scores);
