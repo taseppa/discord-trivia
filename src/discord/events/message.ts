@@ -35,7 +35,7 @@ async function handleMessage(message: Discord.Message) {
   } else if(message.content.startsWith('trivia stop')) {
     await handleStop(message);
   } else if (!message.author.bot) {
-    Trivia.collectAnswer({ letter: message.content, username:message.author.username });
+    Trivia.collectAnswer({ letter: message.content.toLowerCase(), username:message.author.username });
   }
 }
 
